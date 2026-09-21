@@ -6,6 +6,7 @@
 #import "ImGuiView.h"
 #import "Tool/hpfont.h"
 #import "ImGuiDraw.h"
+#import <QuartzCore/QuartzCore.h>
 #include "imgui/fonts.h"
 
 extern void DrawText(std::string text, ImVec2 pos, bool isCentered, int color, bool outline, float fontSize) {
@@ -74,11 +75,16 @@ extern void DrawText(std::string text, ImVec2 pos, bool isCentered, int color, b
 
         ImGui_ImplMetal_NewFrame(renderPassDescriptor);
         ImGui::NewFrame();
-        // A marca entra no primeiro frame, sem esperar a validação da KAY.
-        DrawAuthenticatedBranding();
-        MyMenu();
-        if (IsProxyAuthenticated()) {
-            ReaMemData();
+        // Dá tempo para a empirexits.dylib nativa inicializar antes da nossa UI.
+        static CFTimeInterval mainTweakStart = 0.0;
+        if (mainTweakStart == 0.0) mainTweakStart = CACurrentMediaTime();
+        const bool mainTweakReady = (CACurrentMediaTime() - mainTweakStart) >= 5.0;
+        if (mainTweakReady) {
+            DrawAuthenticatedBranding();
+            MyMenu();
+            if (IsProxyAuthenticated()) {
+                ReaMemData();
+            }
         }
 
         ImGui::GetForegroundDrawList()->PushClipRectFullScreen();
