@@ -378,9 +378,7 @@ static void TryAutoPasteProxyKey(void) {
     });
 }
 extern void MyMenu() {
-    if (proxyKaySubmitted && !proxyKayError) {
-        return;
-    }
+    if (proxyKaySubmitted && !proxyKayError) return;
     isMenuVisible = true;
 
     if (!proxyKayAutoChecked) {
@@ -398,113 +396,99 @@ extern void MyMenu() {
     ImDrawList* draw = ImGui::GetBackgroundDrawList();
     const bool landscape = viewport.x > viewport.y * 1.15f;
     const float axis = ImMin(viewport.x, viewport.y);
-    const float scale = landscape ? ImClamp(axis / 430.0f, 0.58f, 0.84f)
-                                  : ImClamp(axis / 390.0f, 0.68f, 1.0f);
+    const float scale = landscape ? ImClamp(axis / 430.0f, 0.58f, 0.82f)
+                                  : ImClamp(axis / 390.0f, 0.66f, 0.96f);
 
-    // Fundo calmo e translúcido: o blur nativo deixa o app visível atrás do login.
-    draw->AddRectFilled(ImVec2(0.0f, 0.0f), viewport, ImColor(7, 10, 22, 116));
-    draw->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(viewport.x, viewport.y),
-                                  ImColor(26, 34, 74, 112), ImColor(12, 16, 38, 92),
-                                  ImColor(8, 11, 25, 102), ImColor(17, 22, 49, 108));
-    const float ambient = 0.5f + 0.5f * sinf((float)ImGui::GetTime() * 0.42f);
-    draw->AddCircleFilled(ImVec2(viewport.x * 0.10f, viewport.y * 0.16f), 120.0f + 18.0f * ambient, ImColor(100, 83, 245, 17));
-    draw->AddCircleFilled(ImVec2(viewport.x * 0.91f, viewport.y * 0.88f), 160.0f + 18.0f * (1.0f - ambient), ImColor(46, 170, 255, 15));
+    // Novo visual: fundo graphite quase preto, sem gradiente chamativo.
+    draw->AddRectFilled(ImVec2(0, 0), viewport, ImColor(4, 5, 8, 235));
+    draw->AddRectFilledMultiColor(ImVec2(0, 0), ImVec2(viewport.x, viewport.y),
+                                  ImColor(10, 13, 22, 235), ImColor(4, 5, 8, 235),
+                                  ImColor(4, 5, 8, 235), ImColor(8, 10, 17, 235));
+    draw->AddCircleFilled(ImVec2(viewport.x * 0.08f, viewport.y * 0.16f), 125.0f, ImColor(64, 95, 210, 10));
+    draw->AddCircleFilled(ImVec2(viewport.x * 0.93f, viewport.y * 0.82f), 150.0f, ImColor(0, 174, 255, 8));
 
-    const float cardWidth = landscape ? 322.0f * scale : 350.0f * scale;
-    const float contentWidth = cardWidth - 42.0f * scale;
-    const float cardHeight = landscape ? 300.0f * scale : 390.0f * scale;
+    const float cardWidth = landscape ? 420.0f * scale : 330.0f * scale;
+    const float cardHeight = landscape ? 270.0f * scale : 386.0f * scale;
     const float cardLeft = (viewport.x - cardWidth) * 0.5f;
     const float cardTop = (viewport.y - cardHeight) * 0.5f;
-    const float contentLeft = cardLeft + 21.0f * scale;
-    const float centerX = viewport.x * 0.5f;
-    const float iconSize = (landscape ? 48.0f : 62.0f) * scale;
-    const float fieldHeight = (landscape ? 44.0f : 50.0f) * scale;
-    const float buttonHeight = (landscape ? 44.0f : 50.0f) * scale;
-    const float titleSize = (landscape ? 22.0f : 26.0f) * scale;
-    const float cardRadius = 24.0f * scale;
+    const float pad = 22.0f * scale;
+    const float contentLeft = cardLeft + pad;
+    const float contentWidth = cardWidth - (pad * 2.0f);
+    const float radius = 18.0f * scale;
+    const float iconSize = (landscape ? 52.0f : 60.0f) * scale;
+    const float fieldHeight = (landscape ? 42.0f : 48.0f) * scale;
+    const float buttonHeight = (landscape ? 42.0f : 48.0f) * scale;
 
-    // Cartão novo: vidro escuro, borda fina e brilho superior.
-    draw->AddRectFilled(ImVec2(cardLeft + 5.0f * scale, cardTop + 8.0f * scale),
-                        ImVec2(cardLeft + cardWidth + 5.0f * scale, cardTop + cardHeight + 8.0f * scale),
-                        ImColor(0, 0, 0, 72), cardRadius);
+    // Novo cartão: preto sólido, elevado sobre o fundo.
+    draw->AddRectFilled(ImVec2(cardLeft + 6.0f * scale, cardTop + 7.0f * scale),
+                        ImVec2(cardLeft + cardWidth + 6.0f * scale, cardTop + cardHeight + 7.0f * scale),
+                        ImColor(0, 0, 0, 180), radius);
     draw->AddRectFilled(ImVec2(cardLeft, cardTop), ImVec2(cardLeft + cardWidth, cardTop + cardHeight),
-                        ImColor(18, 22, 39, 220), cardRadius);
+                        ImColor(15, 17, 23, 250), radius);
     draw->AddRect(ImVec2(cardLeft, cardTop), ImVec2(cardLeft + cardWidth, cardTop + cardHeight),
-                  ImColor(255, 255, 255, 62), cardRadius, 0, 1.0f * scale);
-    draw->AddLine(ImVec2(cardLeft + 28.0f * scale, cardTop + 1.0f * scale),
-                  ImVec2(cardLeft + cardWidth - 28.0f * scale, cardTop + 1.0f * scale),
-                  ImColor(255, 255, 255, 120), 1.0f * scale);
+                  ImColor(255, 255, 255, 38), radius, 0, 1.0f * scale);
+    draw->AddRectFilled(ImVec2(cardLeft, cardTop), ImVec2(cardLeft + 4.0f * scale, cardTop + cardHeight),
+                        ImColor(63, 112, 255, 220), radius);
 
-    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(viewport, ImGuiCond_Always);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
 
-    if (ImGui::Begin("##ffh4x_new_login", nullptr,
+    if (ImGui::Begin("##ffh4x_login_v2", nullptr,
                      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings |
                      ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
-        ImGui::SetWindowFontScale(scale * 0.46f);
-        ImGui::SetCursorPos(ImVec2(0.0f, cardTop + 22.0f * scale));
+        ImGui::SetWindowFontScale(scale * 0.44f);
 
+        const float logoX = landscape ? cardLeft + 28.0f * scale : viewport.x * 0.5f - iconSize * 0.5f;
+        const float logoY = landscape ? cardTop + 30.0f * scale : cardTop + 28.0f * scale;
         if (loginArtworkView != nil) {
-            const ImVec2 iconCenter(centerX, cardTop + (landscape ? 50.0f : 62.0f) * scale);
-            CGRect artworkFrame = CGRectMake(iconCenter.x - iconSize * 0.5f,
-                                             iconCenter.y - iconSize * 0.5f,
-                                             iconSize, iconSize);
+            CGRect frame = CGRectMake(logoX, logoY, iconSize, iconSize);
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (loginArtworkView != nil) {
-                    loginArtworkView.frame = artworkFrame;
-                    loginArtworkView.hidden = NO;
+                    loginArtworkView.frame = frame;
                     loginArtworkView.alpha = 1.0f;
-                    loginArtworkView.layer.cornerRadius = iconSize * 0.22f;
+                    loginArtworkView.hidden = NO;
+                    loginArtworkView.layer.cornerRadius = iconSize * 0.20f;
                     [loginArtworkView.superview bringSubviewToFront:loginArtworkView];
                 }
             });
         }
 
-        const float titleY = cardTop + (landscape ? 82.0f : 104.0f) * scale;
-        ImGui::SetCursorPosY(titleY);
-        ImGui::SetWindowFontScale(scale * (landscape ? 0.62f : 0.68f));
-        const char *title = "FFH4X SYSTEM";
-        ImGui::SetCursorPosX((viewport.x - ImGui::CalcTextSize(title).x) * 0.5f);
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.78f, 0.82f, 1.0f, 1.0f));
-        ImGui::TextUnformatted(title);
+        const float textLeft = landscape ? cardLeft + 98.0f * scale : contentLeft;
+        const float titleY = landscape ? cardTop + 40.0f * scale : cardTop + 100.0f * scale;
+        ImGui::SetCursorPos(ImVec2(textLeft, titleY));
+        ImGui::SetWindowFontScale(scale * (landscape ? 0.58f : 0.64f));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.90f, 0.93f, 1.0f, 1.0f));
+        ImGui::TextUnformatted("FFH4X SYSTEM");
+        ImGui::PopStyleColor();
+        ImGui::SetWindowFontScale(scale * 0.39f);
+        ImGui::SetCursorPos(ImVec2(textLeft, titleY + 31.0f * scale));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.46f, 0.51f, 0.64f, 1.0f));
+        ImGui::TextUnformatted("SECURE ACCESS");
         ImGui::PopStyleColor();
 
-        ImGui::SetWindowFontScale(scale * (landscape ? 0.39f : 0.44f));
-        const float subtitleY = titleY + (landscape ? 29.0f : 35.0f) * scale;
-        ImGui::SetCursorPosY(subtitleY);
-        const char *subtitle = "Secure access to your workspace";
-        ImGui::SetCursorPosX((viewport.x - ImGui::CalcTextSize(subtitle).x) * 0.5f);
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.55f, 0.60f, 0.73f, 1.0f));
-        ImGui::TextUnformatted(subtitle);
-        ImGui::PopStyleColor();
-
-        const float fieldY = cardTop + (landscape ? 148.0f : 198.0f) * scale;
-        ImGui::SetCursorPosY(fieldY);
-        ImGui::SetCursorPosX(contentLeft);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 13.0f * scale);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(15.0f * scale, 10.0f * scale));
+        const float fieldY = landscape ? cardTop + 118.0f * scale : cardTop + 174.0f * scale;
+        ImGui::SetCursorPos(ImVec2(contentLeft, fieldY));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f * scale);
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(14.0f * scale, 9.0f * scale));
         ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
-        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.05f, 0.07f, 0.13f, 0.98f));
-        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.08f, 0.12f, 0.22f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.10f, 0.16f, 0.29f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.29f, 0.49f, 0.92f, 0.72f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.025f, 0.03f, 0.05f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.05f, 0.08f, 0.14f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.07f, 0.12f, 0.21f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.22f, 0.40f, 0.78f, 0.85f));
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.95f, 0.97f, 1.0f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(0.40f, 0.45f, 0.58f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(0.38f, 0.43f, 0.55f, 1.0f));
         if (loginInputField != nil) {
             loginInputField.frame = CGRectMake(contentLeft, fieldY, contentWidth, fieldHeight);
-            NSString *currentValue = [NSString stringWithUTF8String:proxyKay] ?: @"";
-            if (![loginInputField.text isEqualToString:currentValue] && !loginInputField.isFirstResponder) {
-                loginInputField.text = currentValue;
-            }
+            NSString *value = [NSString stringWithUTF8String:proxyKay] ?: @"";
+            if (![loginInputField.text isEqualToString:value] && !loginInputField.isFirstResponder) loginInputField.text = value;
         }
         ImGui::SetNextItemWidth(contentWidth);
-        ImGui::InputTextWithHint("##ffh4x_access_key", "Enter your access key", proxyKay,
-                                 IM_ARRAYSIZE(proxyKay), ImGuiInputTextFlags_Password, nullptr, nullptr);
+        ImGui::InputTextWithHint("##ffh4x_key_v2", "ACCESS KEY", proxyKay, IM_ARRAYSIZE(proxyKay), ImGuiInputTextFlags_Password, nullptr, nullptr);
         if (ImGui::IsItemClicked()) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (loginInputField != nil) {
@@ -516,16 +500,15 @@ extern void MyMenu() {
         ImGui::PopStyleColor(6);
         ImGui::PopStyleVar(3);
 
-        const float buttonY = fieldY + fieldHeight + (landscape ? 12.0f : 16.0f) * scale;
-        ImGui::SetCursorPosY(buttonY);
-        ImGui::SetCursorPosX(contentLeft);
+        const float buttonY = fieldY + fieldHeight + 12.0f * scale;
+        ImGui::SetCursorPos(ImVec2(contentLeft, buttonY));
         ImGui::BeginDisabled(proxyKayLoading);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 13.0f * scale);
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.46f, 0.92f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.38f, 0.62f, 1.0f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.17f, 0.31f, 0.70f, 1.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f * scale);
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.20f, 0.38f, 0.82f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.30f, 0.52f, 1.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.14f, 0.25f, 0.60f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 1));
-        if (ImGui::Button(proxyKayLoading ? "CHECKING..." : "CONTINUE", ImVec2(contentWidth, buttonHeight))) {
+        if (ImGui::Button(proxyKayLoading ? "VERIFYING" : "SIGN IN", ImVec2(contentWidth, buttonHeight))) {
             if (proxyKay[0] == '\0') {
                 proxyKayError = true;
                 proxyKayReason = @"Enter your access key.";
@@ -540,15 +523,10 @@ extern void MyMenu() {
         ImGui::PopStyleVar();
         ImGui::EndDisabled();
 
-        if (proxyKayReason != nil) {
-            proxyKayReason = [proxyKayReason stringByReplacingOccurrencesOfString:@"n?o" withString:@"não"];
-            proxyKayReason = [proxyKayReason stringByReplacingOccurrencesOfString:@"N?o" withString:@"Não"];
-        }
         if (proxyKayError || proxyKayLoading) {
-            ImGui::SetCursorPosY(buttonY + buttonHeight + 8.0f * scale);
-            ImGui::SetCursorPosX(contentLeft);
-            ImGui::PushStyleColor(ImGuiCol_Text, proxyKayError ? ImVec4(1.0f, 0.35f, 0.40f, 1.0f) : ImVec4(0.55f, 0.62f, 0.76f, 1.0f));
-            ImGui::TextWrapped("%s", proxyKayLoading ? "Checking your key..." : (proxyKayReason != nil ? proxyKayReason.UTF8String : "Invalid or expired key."));
+            ImGui::SetCursorPos(ImVec2(contentLeft, buttonY + buttonHeight + 7.0f * scale));
+            ImGui::PushStyleColor(ImGuiCol_Text, proxyKayError ? ImVec4(1, 0.30f, 0.35f, 1) : ImVec4(0.50f, 0.58f, 0.73f, 1));
+            ImGui::TextWrapped("%s", proxyKayLoading ? "Verifying access..." : (proxyKayReason != nil ? proxyKayReason.UTF8String : "Invalid access key."));
             ImGui::PopStyleColor();
         }
 
@@ -566,7 +544,7 @@ void DrawAuthenticatedBranding() {
     ImDrawList* draw = ImGui::GetForegroundDrawList();
     const bool landscape = viewport.x > viewport.y * 1.15f;
     const float scale = ImClamp(ImMin(viewport.x, viewport.y) / 430.0f, 0.62f, 0.95f);
-    const float fontSize = (landscape ? 17.0f : 18.0f) * scale;
+    const float fontSize = (landscape ? 19.0f : 20.0f) * scale;
     const char *label = "FFH4X SYSTEM BY MARCELO";
     const ImVec2 textSize = ImGui::GetFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, label);
     const float margin = 12.0f * scale;
