@@ -74,12 +74,12 @@ extern void DrawText(std::string text, ImVec2 pos, bool isCentered, int color, b
 
         ImGui_ImplMetal_NewFrame(renderPassDescriptor);
         ImGui::NewFrame();
+        // A marca entra no primeiro frame, sem esperar a validação da KAY.
+        DrawAuthenticatedBranding();
         MyMenu();
         if (IsProxyAuthenticated()) {
             ReaMemData();
         }
-        // A marca é somente visual e aparece no login e após a autenticação.
-        DrawAuthenticatedBranding();
 
         ImGui::GetForegroundDrawList()->PushClipRectFullScreen();
         ImGui::Render();
