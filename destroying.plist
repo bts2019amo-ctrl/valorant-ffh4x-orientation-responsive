@@ -5,10 +5,9 @@
 	<key>Filter</key>
 	<dict>
 		<key>Bundles</key>
-		<array>
-			<string>com.tencent.tmgp.codev</string>
-			<string>com.garena.game.df</string>
-		</array>
+            <array>
+                <string>com.garena.game.df</string>
+            </array>
 	</dict>
 </dict>
 </plist>
