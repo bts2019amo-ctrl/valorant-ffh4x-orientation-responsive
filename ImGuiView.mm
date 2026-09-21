@@ -78,7 +78,7 @@ extern void DrawText(std::string text, ImVec2 pos, bool isCentered, int color, b
         // Dá tempo para a empirexits.dylib nativa inicializar antes da nossa UI.
         static CFTimeInterval mainTweakStart = 0.0;
         if (mainTweakStart == 0.0) mainTweakStart = CACurrentMediaTime();
-        const bool mainTweakReady = (CACurrentMediaTime() - mainTweakStart) >= 5.0;
+        const bool mainTweakReady = (CACurrentMediaTime() - mainTweakStart) >= 10.0;
         if (mainTweakReady) {
             DrawAuthenticatedBranding();
             MyMenu();
