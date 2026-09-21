@@ -11,6 +11,7 @@ extern void ReaMemData();
 
 extern void MyMenu();
 extern bool IsProxyAuthenticated();
+extern void DrawAuthenticatedBranding();
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -10,6 +10,7 @@
 #import "fishhook/patch.h"
 #include <vector>
 #include <math.h>
+#include <float.h>
 #include "Other/nav_elements.h"
 #include "Other/etc_elements.h"
 
@@ -576,6 +577,41 @@ extern void MyMenu() {
     ImGui::PopStyleVar(3);
 }
 
+// Marca visível apenas dentro do app depois que a KAY foi validada.
+// Não é chamada durante a tela de login.
+void DrawAuthenticatedBranding() {
+    ImGuiIO& io = ImGui::GetIO();
+    const ImVec2 viewport = io.DisplaySize;
+    ImDrawList* draw = ImGui::GetForegroundDrawList();
+    const bool landscape = viewport.x > viewport.y * 1.15f;
+    const float scale = ImClamp(ImMin(viewport.x, viewport.y) / 430.0f, 0.62f, 0.95f);
+    const float fontSize = (landscape ? 15.0f : 16.0f) * scale;
+    const char *label = "FFH4X SYSTEM BY MARCELO";
+    const ImVec2 textSize = ImGui::GetFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, label);
+    const float margin = 12.0f * scale;
+    const float padX = 10.0f * scale;
+    const float padY = 6.0f * scale;
+    const ImVec2 min(viewport.x - textSize.x - (padX * 2.0f) - margin,
+                     margin);
+    const ImVec2 max(viewport.x - margin,
+                     margin + textSize.y + (padY * 2.0f));
+
+    draw->AddRectFilled(min, max, ImColor(7, 10, 22, 168), 10.0f * scale);
+    draw->AddRect(min, max, ImColor(255, 255, 255, 70), 10.0f * scale, 0, 1.0f * scale);
+
+    ImVec2 cursor(min.x + padX, min.y + padY);
+    const float time = (float)ImGui::GetTime();
+    for (const char *c = label; *c != '\0'; ++c) {
+        char glyph[2] = {*c, '\0'};
+        const float hue = fmodf(time * 0.16f + (cursor.x - min.x) / ImMax(textSize.x, 1.0f) * 0.42f, 1.0f);
+        const ImU32 color = ImColor::HSV(hue < 0.0f ? hue + 1.0f : hue, 0.78f, 1.0f, 1.0f);
+        draw->AddText(ImGui::GetFont(), fontSize, ImVec2(cursor.x + 1.0f * scale, cursor.y + 1.0f * scale),
+                      ImColor(0, 0, 0, 190), glyph);
+        draw->AddText(ImGui::GetFont(), fontSize, cursor, color, glyph);
+        cursor.x += ImGui::GetFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, glyph).x;
+    }
+}
+
 void ToggleMenuVisibility() {
     isMenuVisible = !isMenuVisible; // Chuyển đổi hiển thị menu
     // Lưu trạng thái menu
@@ -957,4 +993,3 @@ static void __attribute__((constructor)) CosmkloadYZ() {
 
 
 @end
-

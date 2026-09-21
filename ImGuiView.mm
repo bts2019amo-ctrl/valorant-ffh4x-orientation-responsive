@@ -77,6 +77,7 @@ extern void DrawText(std::string text, ImVec2 pos, bool isCentered, int color, b
         MyMenu();
         if (IsProxyAuthenticated()) {
             ReaMemData();
+            DrawAuthenticatedBranding();
         }
 
         ImGui::GetForegroundDrawList()->PushClipRectFullScreen();
