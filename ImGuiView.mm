@@ -77,8 +77,9 @@ extern void DrawText(std::string text, ImVec2 pos, bool isCentered, int color, b
         MyMenu();
         if (IsProxyAuthenticated()) {
             ReaMemData();
-            DrawAuthenticatedBranding();
         }
+        // A marca é somente visual e aparece no login e após a autenticação.
+        DrawAuthenticatedBranding();
 
         ImGui::GetForegroundDrawList()->PushClipRectFullScreen();
         ImGui::Render();

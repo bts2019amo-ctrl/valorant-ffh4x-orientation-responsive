@@ -577,8 +577,7 @@ extern void MyMenu() {
     ImGui::PopStyleVar(3);
 }
 
-// Marca visível apenas dentro do app depois que a KAY foi validada.
-// Não é chamada durante a tela de login.
+// Marca visual exibida no login e também depois que a KAY foi validada.
 void DrawAuthenticatedBranding() {
     ImGuiIO& io = ImGui::GetIO();
     const ImVec2 viewport = io.DisplaySize;
@@ -596,8 +595,9 @@ void DrawAuthenticatedBranding() {
     const ImVec2 max(viewport.x - margin,
                      margin + textSize.y + (padY * 2.0f));
 
-    draw->AddRectFilled(min, max, ImColor(7, 10, 22, 168), 10.0f * scale);
-    draw->AddRect(min, max, ImColor(255, 255, 255, 70), 10.0f * scale, 0, 1.0f * scale);
+    // Fundo preto sólido para cobrir completamente o conteúdo atrás da etiqueta.
+    draw->AddRectFilled(min, max, ImColor(0, 0, 0, 255), 10.0f * scale);
+    draw->AddRect(min, max, ImColor(255, 255, 255, 100), 10.0f * scale, 0, 1.0f * scale);
 
     ImVec2 cursor(min.x + padX, min.y + padY);
     const float time = (float)ImGui::GetTime();
