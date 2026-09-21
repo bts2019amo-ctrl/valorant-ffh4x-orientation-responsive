@@ -1,0 +1,32 @@
+name: Build Theos package
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Theos
+        shell: bash
+        run: |
+          git clone --depth 1 https://github.com/theos/theos.git "$HOME/theos"
+          bash "$HOME/theos/bin/install-theos" --no-hb
+          echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
+          echo "$HOME/theos/bin" >> "$GITHUB_PATH"
+
+      - name: Build package
+        run: |
+          make package FINALPACKAGE=1
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: destroying-deb
+          path: packages/*.deb
+          if-no-files-found: error

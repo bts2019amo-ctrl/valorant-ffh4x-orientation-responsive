@@ -1,0 +1,9 @@
+Package: com.ds.valorant
+Name:  DS Valorant
+Depends: mobilesubstrate, preferenceloader
+Version: 2.0
+Architecture: iphoneos-arm64
+Description: procoda666
+Maintainer: destroying
+Author: destroying
+Section: Tweaks
