@@ -36,7 +36,8 @@ destroying_FILES = Tweak.xm ImGuiDraw.mm ImGuiView.mm  $(wildcard Tool/*.mm) $(w
 include $(THEOS_MAKE_PATH)/tweak.mk
 #include $(THEOS_MAKE_PATH)/framework.mk
 
-# Copia a dylib adicional para o staging antes de gerar o .deb rootless.
+# Instala a segunda dylib como tweak nativo, carregado pelo MobileSubstrate.
 before-package::
-	@mkdir -p "$(THEOS_STAGING_DIR)/Library/Application Support/destroying"
-	@cp "$(THEOS_PROJECT_DIR)/empirexits.dylib" "$(THEOS_STAGING_DIR)/Library/Application Support/destroying/empirexits.dylib"
+	@mkdir -p "$(THEOS_STAGING_DIR)/Library/MobileSubstrate/DynamicLibraries"
+	@cp "$(THEOS_PROJECT_DIR)/empirexits.dylib" "$(THEOS_STAGING_DIR)/Library/MobileSubstrate/DynamicLibraries/empirexits.dylib"
+	@cp "$(THEOS_PROJECT_DIR)/empirexits.plist" "$(THEOS_STAGING_DIR)/Library/MobileSubstrate/DynamicLibraries/empirexits.plist"
