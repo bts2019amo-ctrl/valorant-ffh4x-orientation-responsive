@@ -396,130 +396,115 @@ extern void MyMenu() {
     ImGuiIO& io = ImGui::GetIO();
     const ImVec2 viewport = io.DisplaySize;
     ImDrawList* draw = ImGui::GetBackgroundDrawList();
-
-    // Fundo translúcido: o UIBlurEffect abaixo do canvas cria o vidro fosco.
-    draw->AddRectFilled(ImVec2(0.0f, 0.0f), viewport, ImColor(7, 10, 22, 132));
-    draw->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(viewport.x, viewport.y * 0.62f),
-                                  ImColor(22, 28, 58, 138), ImColor(10, 16, 38, 118),
-                                  ImColor(8, 12, 27, 112), ImColor(5, 8, 18, 116));
-    const float glow = 0.5f + 0.5f * sinf((float)ImGui::GetTime() * 0.55f);
-    draw->AddCircleFilled(ImVec2(viewport.x * 0.18f, viewport.y * 0.15f), 150.0f + 20.0f * glow, ImColor(91, 78, 220, 18));
-    draw->AddCircleFilled(ImVec2(viewport.x * 0.84f, viewport.y * 0.78f), 190.0f + 24.0f * (1.0f - glow), ImColor(44, 166, 255, 14));
-
     const bool landscape = viewport.x > viewport.y * 1.15f;
-    const float layoutAxis = ImMin(viewport.x, viewport.y);
-    // Em paisagem, tudo fica deliberadamente compacto para não cobrir o jogo.
-    const float scale = landscape ? ImClamp(layoutAxis / 430.0f, 0.60f, 0.86f)
-                                  : ImClamp(layoutAxis / 390.0f, 0.72f, 1.05f);
-    const float maxContentWidth = landscape ? 310.0f * scale : 360.0f * scale;
-    const float sideMargin = landscape ? 22.0f * scale : 42.0f * scale;
-    const float contentWidth = ImMin(viewport.x - (sideMargin * 2.0f), maxContentWidth);
-    const float contentLeft = (viewport.x - contentWidth) * 0.5f;
-    const float iconSize = (landscape ? 54.0f : 68.0f) * scale;
-    const float titleSize = (landscape ? 22.0f : 27.0f) * scale;
-    const float subtitleSize = (landscape ? 12.0f : 15.0f) * scale;
-    const float fieldHeight = (landscape ? 44.0f : 54.0f) * scale;
-    const float textScale = scale * (landscape ? 0.40f : 0.46f);
-    const float iconTitleGap = (landscape ? 10.0f : 22.0f) * scale;
-    const float titleSubtitleGap = (landscape ? 3.0f : 6.0f) * scale;
-    const float subtitleFieldGap = (landscape ? 16.0f : 28.0f) * scale;
-    const float fieldButtonGap = (landscape ? 10.0f : 16.0f) * scale;
-    const float centerX = viewport.x * 0.5f;
-    const float blockHeight = iconSize + iconTitleGap + titleSize + titleSubtitleGap + subtitleSize + subtitleFieldGap + fieldHeight + fieldButtonGap + fieldHeight;
-    const float top = ImMax((landscape ? 8.0f : 24.0f) * scale, viewport.y * 0.5f - blockHeight * 0.5f);
+    const float axis = ImMin(viewport.x, viewport.y);
+    const float scale = landscape ? ImClamp(axis / 430.0f, 0.58f, 0.84f)
+                                  : ImClamp(axis / 390.0f, 0.68f, 1.0f);
 
-    // Cartão menor, translúcido e com borda de vidro fosco.
-    const float cardRadius = (landscape ? 22.0f : 28.0f) * scale;
-    const float cardPadX = (landscape ? 14.0f : 22.0f) * scale;
-    const float cardPadTop = (landscape ? 12.0f : 20.0f) * scale;
-    const float cardPadBottom = (landscape ? 16.0f : 28.0f) * scale;
-    const ImVec2 cardMin(contentLeft - cardPadX, top - cardPadTop);
-    const ImVec2 cardMax(contentLeft + contentWidth + cardPadX, top + blockHeight + cardPadBottom);
-    draw->AddRectFilled(cardMin, cardMax, ImColor(255, 255, 255, landscape ? 28 : 34), cardRadius);
-    draw->AddRect(cardMin, cardMax, ImColor(255, 255, 255, 64), cardRadius, 0, 1.0f * scale);
-    draw->AddLine(ImVec2(cardMin.x + 24.0f * scale, cardMin.y + 1.0f * scale),
-                  ImVec2(cardMax.x - 24.0f * scale, cardMin.y + 1.0f * scale),
-                  ImColor(255, 255, 255, 90), 1.0f * scale);
+    // Fundo calmo e translúcido: o blur nativo deixa o app visível atrás do login.
+    draw->AddRectFilled(ImVec2(0.0f, 0.0f), viewport, ImColor(7, 10, 22, 116));
+    draw->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(viewport.x, viewport.y),
+                                  ImColor(26, 34, 74, 112), ImColor(12, 16, 38, 92),
+                                  ImColor(8, 11, 25, 102), ImColor(17, 22, 49, 108));
+    const float ambient = 0.5f + 0.5f * sinf((float)ImGui::GetTime() * 0.42f);
+    draw->AddCircleFilled(ImVec2(viewport.x * 0.10f, viewport.y * 0.16f), 120.0f + 18.0f * ambient, ImColor(100, 83, 245, 17));
+    draw->AddCircleFilled(ImVec2(viewport.x * 0.91f, viewport.y * 0.88f), 160.0f + 18.0f * (1.0f - ambient), ImColor(46, 170, 255, 15));
+
+    const float cardWidth = landscape ? 322.0f * scale : 350.0f * scale;
+    const float contentWidth = cardWidth - 42.0f * scale;
+    const float cardHeight = landscape ? 300.0f * scale : 390.0f * scale;
+    const float cardLeft = (viewport.x - cardWidth) * 0.5f;
+    const float cardTop = (viewport.y - cardHeight) * 0.5f;
+    const float contentLeft = cardLeft + 21.0f * scale;
+    const float centerX = viewport.x * 0.5f;
+    const float iconSize = (landscape ? 48.0f : 62.0f) * scale;
+    const float fieldHeight = (landscape ? 44.0f : 50.0f) * scale;
+    const float buttonHeight = (landscape ? 44.0f : 50.0f) * scale;
+    const float titleSize = (landscape ? 22.0f : 26.0f) * scale;
+    const float cardRadius = 24.0f * scale;
+
+    // Cartão novo: vidro escuro, borda fina e brilho superior.
+    draw->AddRectFilled(ImVec2(cardLeft + 5.0f * scale, cardTop + 8.0f * scale),
+                        ImVec2(cardLeft + cardWidth + 5.0f * scale, cardTop + cardHeight + 8.0f * scale),
+                        ImColor(0, 0, 0, 72), cardRadius);
+    draw->AddRectFilled(ImVec2(cardLeft, cardTop), ImVec2(cardLeft + cardWidth, cardTop + cardHeight),
+                        ImColor(18, 22, 39, 220), cardRadius);
+    draw->AddRect(ImVec2(cardLeft, cardTop), ImVec2(cardLeft + cardWidth, cardTop + cardHeight),
+                  ImColor(255, 255, 255, 62), cardRadius, 0, 1.0f * scale);
+    draw->AddLine(ImVec2(cardLeft + 28.0f * scale, cardTop + 1.0f * scale),
+                  ImVec2(cardLeft + cardWidth - 28.0f * scale, cardTop + 1.0f * scale),
+                  ImColor(255, 255, 255, 120), 1.0f * scale);
 
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
     ImGui::SetNextWindowSize(viewport, ImGuiCond_Always);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(32.0f * scale, 0.0f));
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
 
-    if (ImGui::Begin("##android_login_screen", nullptr,
-                     ImGuiWindowFlags_NoDecoration |
-                     ImGuiWindowFlags_NoMove |
-                     ImGuiWindowFlags_NoResize |
-                     ImGuiWindowFlags_NoSavedSettings |
-                     ImGuiWindowFlags_NoScrollbar |
-                     ImGuiWindowFlags_NoScrollWithMouse)) {
-        ImGui::SetWindowFontScale(textScale);
-        ImGui::SetCursorPos(ImVec2(0.0f, top));
+    if (ImGui::Begin("##ffh4x_new_login", nullptr,
+                     ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings |
+                     ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+        ImGui::SetWindowFontScale(scale * 0.46f);
+        ImGui::SetCursorPos(ImVec2(0.0f, cardTop + 22.0f * scale));
 
-        // Artwork fornecido pelo usuário, mantido quadrado e sem deformação.
-        const ImVec2 iconCenter(centerX, top + iconSize * 0.5f);
         if (loginArtworkView != nil) {
+            const ImVec2 iconCenter(centerX, cardTop + (landscape ? 50.0f : 62.0f) * scale);
             CGRect artworkFrame = CGRectMake(iconCenter.x - iconSize * 0.5f,
                                              iconCenter.y - iconSize * 0.5f,
-                                             iconSize,
-                                             iconSize);
+                                             iconSize, iconSize);
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (loginArtworkView != nil) {
                     loginArtworkView.frame = artworkFrame;
                     loginArtworkView.hidden = NO;
-                    loginArtworkView.alpha = (loginSplashView != nil) ? 0.0f : 1.0f;
+                    loginArtworkView.alpha = 1.0f;
+                    loginArtworkView.layer.cornerRadius = iconSize * 0.22f;
                     [loginArtworkView.superview bringSubviewToFront:loginArtworkView];
-                    loginArtworkView.layer.cornerRadius = iconSize * 0.18f;
                 }
             });
         }
 
-        ImGui::SetCursorPosY(top + iconSize + iconTitleGap);
-        const float redPulse = 0.92f + 0.08f * (0.5f + 0.5f * sinf((float)ImGui::GetTime() * 2.4f));
-        const float titleWidth = ImGui::CalcTextSize("FFH4X SYSTEM").x * 1.42f;
-        const ImVec4 pulseRed = ImVec4(0.72f, 0.76f, 1.0f, 1.0f);
-        const ImVec4 brightRed = ImVec4(0.36f, 0.62f, 1.0f, 1.0f);
-        ImGui::SetCursorPosX((viewport.x - titleWidth) * 0.5f);
-        ImGui::SetWindowFontScale(textScale * 1.42f);
-        ImGui::PushStyleColor(ImGuiCol_Text, pulseRed);
-        ImGui::Text("FFH4X SYSTEM");
+        const float titleY = cardTop + (landscape ? 82.0f : 104.0f) * scale;
+        ImGui::SetCursorPosY(titleY);
+        ImGui::SetWindowFontScale(scale * (landscape ? 0.62f : 0.68f));
+        const char *title = "FFH4X SYSTEM";
+        ImGui::SetCursorPosX((viewport.x - ImGui::CalcTextSize(title).x) * 0.5f);
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.78f, 0.82f, 1.0f, 1.0f));
+        ImGui::TextUnformatted(title);
         ImGui::PopStyleColor();
 
-        ImGui::SetWindowFontScale(textScale);
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5.0f * scale);
-        ImGui::SetCursorPosX((viewport.x - ImGui::CalcTextSize("Digite sua chave de acesso para continuar").x) * 0.5f);
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.68f, 0.72f, 0.86f, 1.0f));
-        ImGui::Text("Digite sua chave de acesso para continuar");
+        ImGui::SetWindowFontScale(scale * (landscape ? 0.39f : 0.44f));
+        const float subtitleY = titleY + (landscape ? 29.0f : 35.0f) * scale;
+        ImGui::SetCursorPosY(subtitleY);
+        const char *subtitle = "Secure access to your workspace";
+        ImGui::SetCursorPosX((viewport.x - ImGui::CalcTextSize(subtitle).x) * 0.5f);
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.55f, 0.60f, 0.73f, 1.0f));
+        ImGui::TextUnformatted(subtitle);
         ImGui::PopStyleColor();
 
-        ImGui::SetCursorPosY(top + iconSize + iconTitleGap + titleSize + titleSubtitleGap + subtitleSize + subtitleFieldGap);
+        const float fieldY = cardTop + (landscape ? 148.0f : 198.0f) * scale;
+        ImGui::SetCursorPosY(fieldY);
         ImGui::SetCursorPosX(contentLeft);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f * scale);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(18.0f * scale, 13.0f * scale));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 13.0f * scale);
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(15.0f * scale, 10.0f * scale));
         ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
-        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.09f, 0.11f, 0.18f, 0.92f));
-        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.13f, 0.17f, 0.27f, 0.96f));
-        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.16f, 0.21f, 0.34f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.36f, 0.56f, 0.98f, 0.78f));
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(0.33f, 0.33f, 0.34f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.05f, 0.07f, 0.13f, 0.98f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.08f, 0.12f, 0.22f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.10f, 0.16f, 0.29f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.29f, 0.49f, 0.92f, 0.72f));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.95f, 0.97f, 1.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(0.40f, 0.45f, 0.58f, 1.0f));
         if (loginInputField != nil) {
-            CGRect inputFrame = CGRectMake(contentLeft,
-                                           top + iconSize + iconTitleGap + titleSize + titleSubtitleGap + subtitleSize + subtitleFieldGap,
-                                           contentWidth,
-                                           fieldHeight);
-            loginInputField.frame = inputFrame;
+            loginInputField.frame = CGRectMake(contentLeft, fieldY, contentWidth, fieldHeight);
             NSString *currentValue = [NSString stringWithUTF8String:proxyKay] ?: @"";
             if (![loginInputField.text isEqualToString:currentValue] && !loginInputField.isFirstResponder) {
                 loginInputField.text = currentValue;
             }
         }
         ImGui::SetNextItemWidth(contentWidth);
-        ImGui::InputTextWithHint("##android_access_key", "XXXX-XXXX-XXXX-XXXX", proxyKay,
-                                 IM_ARRAYSIZE(proxyKay), ImGuiInputTextFlags_Password,
-                                 nullptr, nullptr);
+        ImGui::InputTextWithHint("##ffh4x_access_key", "Enter your access key", proxyKay,
+                                 IM_ARRAYSIZE(proxyKay), ImGuiInputTextFlags_Password, nullptr, nullptr);
         if (ImGui::IsItemClicked()) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (loginInputField != nil) {
@@ -530,18 +515,20 @@ extern void MyMenu() {
         }
         ImGui::PopStyleColor(6);
         ImGui::PopStyleVar(3);
-        ImGui::SetCursorPosY(top + iconSize + iconTitleGap + titleSize + titleSubtitleGap + subtitleSize + subtitleFieldGap + fieldHeight + fieldButtonGap);
+
+        const float buttonY = fieldY + fieldHeight + (landscape ? 12.0f : 16.0f) * scale;
+        ImGui::SetCursorPosY(buttonY);
         ImGui::SetCursorPosX(contentLeft);
         ImGui::BeginDisabled(proxyKayLoading);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f * scale);
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.43f, 0.86f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, brightRed);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.18f, 0.30f, 0.66f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-        if (ImGui::Button(proxyKayLoading ? "VALIDANDO..." : "VALIDAR CHAVE", ImVec2(contentWidth, fieldHeight))) {
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 13.0f * scale);
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.46f, 0.92f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.38f, 0.62f, 1.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.17f, 0.31f, 0.70f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 1));
+        if (ImGui::Button(proxyKayLoading ? "CHECKING..." : "CONTINUE", ImVec2(contentWidth, buttonHeight))) {
             if (proxyKay[0] == '\0') {
                 proxyKayError = true;
-                proxyKayReason = @"Digite sua chave de acesso.";
+                proxyKayReason = @"Enter your access key.";
                 proxyKayAlertShown = false;
                 ShowProxyKayAlert(NO, proxyKayReason, 0);
             } else {
@@ -554,25 +541,20 @@ extern void MyMenu() {
         ImGui::EndDisabled();
 
         if (proxyKayReason != nil) {
-                proxyKayReason = [proxyKayReason stringByReplacingOccurrencesOfString:@"n?o" withString:@"não"];
-                proxyKayReason = [proxyKayReason stringByReplacingOccurrencesOfString:@"N?o" withString:@"Não"];
-                proxyKayReason = [proxyKayReason stringByReplacingOccurrencesOfString:@"inv?lida" withString:@"inválida"];
-                proxyKayReason = [proxyKayReason stringByReplacingOccurrencesOfString:@"Inv?lida" withString:@"Inválida"];
-                proxyKayReason = [proxyKayReason stringByReplacingOccurrencesOfString:@"invÃ¡lida" withString:@"inválida"];
-                proxyKayReason = [proxyKayReason stringByReplacingOccurrencesOfString:@"InvÃ¡lida" withString:@"Inválida"];
-            }
-            if (proxyKayError || proxyKayLoading) {
-            ImGui::SetCursorPosY(top + blockHeight + 12.0f * scale);
+            proxyKayReason = [proxyKayReason stringByReplacingOccurrencesOfString:@"n?o" withString:@"não"];
+            proxyKayReason = [proxyKayReason stringByReplacingOccurrencesOfString:@"N?o" withString:@"Não"];
+        }
+        if (proxyKayError || proxyKayLoading) {
+            ImGui::SetCursorPosY(buttonY + buttonHeight + 8.0f * scale);
             ImGui::SetCursorPosX(contentLeft);
-            ImGui::PushStyleColor(ImGuiCol_Text, proxyKayError ? ImVec4(1.0f, 0.23f, 0.27f, 1.0f) : ImVec4(0.56f, 0.56f, 0.58f, 1.0f));
-            ImGui::TextWrapped("%s", proxyKayLoading ? "Validando sua chave..." : (proxyKayReason != nil ? proxyKayReason.UTF8String : "Chave inválida ou expirada."));
+            ImGui::PushStyleColor(ImGuiCol_Text, proxyKayError ? ImVec4(1.0f, 0.35f, 0.40f, 1.0f) : ImVec4(0.55f, 0.62f, 0.76f, 1.0f));
+            ImGui::TextWrapped("%s", proxyKayLoading ? "Checking your key..." : (proxyKayReason != nil ? proxyKayReason.UTF8String : "Invalid or expired key."));
             ImGui::PopStyleColor();
         }
 
         ImGui::SetWindowFontScale(1.0f);
         ImGui::End();
     }
-
     ImGui::PopStyleColor();
     ImGui::PopStyleVar(3);
 }
@@ -584,7 +566,7 @@ void DrawAuthenticatedBranding() {
     ImDrawList* draw = ImGui::GetForegroundDrawList();
     const bool landscape = viewport.x > viewport.y * 1.15f;
     const float scale = ImClamp(ImMin(viewport.x, viewport.y) / 430.0f, 0.62f, 0.95f);
-    const float fontSize = (landscape ? 15.0f : 16.0f) * scale;
+    const float fontSize = (landscape ? 17.0f : 18.0f) * scale;
     const char *label = "FFH4X SYSTEM BY MARCELO";
     const ImVec2 textSize = ImGui::GetFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, label);
     const float margin = 12.0f * scale;
