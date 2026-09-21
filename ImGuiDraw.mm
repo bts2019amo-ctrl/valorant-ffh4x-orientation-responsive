@@ -396,37 +396,49 @@ extern void MyMenu() {
     const ImVec2 viewport = io.DisplaySize;
     ImDrawList* draw = ImGui::GetBackgroundDrawList();
 
-    // Visual liquid glass inspirado no iOS: azul-noite, brilho difuso e cartão translúcido.
-    draw->AddRectFilled(ImVec2(0.0f, 0.0f), viewport, ImColor(7, 10, 22, 255));
+    // Fundo translúcido: o UIBlurEffect abaixo do canvas cria o vidro fosco.
+    draw->AddRectFilled(ImVec2(0.0f, 0.0f), viewport, ImColor(7, 10, 22, 132));
     draw->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(viewport.x, viewport.y * 0.62f),
-                                  ImColor(22, 28, 58, 255), ImColor(10, 16, 38, 255),
-                                  ImColor(8, 12, 27, 255), ImColor(5, 8, 18, 255));
+                                  ImColor(22, 28, 58, 138), ImColor(10, 16, 38, 118),
+                                  ImColor(8, 12, 27, 112), ImColor(5, 8, 18, 116));
     const float glow = 0.5f + 0.5f * sinf((float)ImGui::GetTime() * 0.55f);
     draw->AddCircleFilled(ImVec2(viewport.x * 0.18f, viewport.y * 0.15f), 150.0f + 20.0f * glow, ImColor(91, 78, 220, 18));
     draw->AddCircleFilled(ImVec2(viewport.x * 0.84f, viewport.y * 0.78f), 190.0f + 24.0f * (1.0f - glow), ImColor(44, 166, 255, 14));
 
+    const bool landscape = viewport.x > viewport.y * 1.15f;
     const float layoutAxis = ImMin(viewport.x, viewport.y);
-    const float scale = ImClamp(layoutAxis / 390.0f, 0.72f, 1.18f);
-    const float maxContentWidth = 390.0f * scale;
-    const float contentWidth = ImMin(viewport.x - (48.0f * scale), maxContentWidth);
+    // Em paisagem, tudo fica deliberadamente compacto para não cobrir o jogo.
+    const float scale = landscape ? ImClamp(layoutAxis / 430.0f, 0.60f, 0.86f)
+                                  : ImClamp(layoutAxis / 390.0f, 0.72f, 1.05f);
+    const float maxContentWidth = landscape ? 310.0f * scale : 360.0f * scale;
+    const float sideMargin = landscape ? 22.0f * scale : 42.0f * scale;
+    const float contentWidth = ImMin(viewport.x - (sideMargin * 2.0f), maxContentWidth);
     const float contentLeft = (viewport.x - contentWidth) * 0.5f;
-    const float iconSize = 80.0f * scale;
-    const float titleSize = 28.0f * scale;
-    const float subtitleSize = 15.0f * scale;
-    const float fieldHeight = 60.0f * scale;
-    const float textScale = scale * 0.48f;
+    const float iconSize = (landscape ? 54.0f : 68.0f) * scale;
+    const float titleSize = (landscape ? 22.0f : 27.0f) * scale;
+    const float subtitleSize = (landscape ? 12.0f : 15.0f) * scale;
+    const float fieldHeight = (landscape ? 44.0f : 54.0f) * scale;
+    const float textScale = scale * (landscape ? 0.40f : 0.46f);
+    const float iconTitleGap = (landscape ? 10.0f : 22.0f) * scale;
+    const float titleSubtitleGap = (landscape ? 3.0f : 6.0f) * scale;
+    const float subtitleFieldGap = (landscape ? 16.0f : 28.0f) * scale;
+    const float fieldButtonGap = (landscape ? 10.0f : 16.0f) * scale;
     const float centerX = viewport.x * 0.5f;
-    const float blockHeight = iconSize + 24.0f * scale + titleSize + 8.0f * scale + subtitleSize + 40.0f * scale + fieldHeight + 20.0f * scale + fieldHeight;
-    const float top = ImMax(32.0f * scale, viewport.y * 0.5f - blockHeight * 0.5f);
+    const float blockHeight = iconSize + iconTitleGap + titleSize + titleSubtitleGap + subtitleSize + subtitleFieldGap + fieldHeight + fieldButtonGap + fieldHeight;
+    const float top = ImMax((landscape ? 8.0f : 24.0f) * scale, viewport.y * 0.5f - blockHeight * 0.5f);
 
-    // Cartão de vidro com borda sutil e sombra difusa.
-    const ImVec2 cardMin(contentLeft - 22.0f * scale, top - 24.0f * scale);
-    const ImVec2 cardMax(contentLeft + contentWidth + 22.0f * scale, top + blockHeight + 34.0f * scale);
-    draw->AddRectFilled(cardMin, cardMax, ImColor(255, 255, 255, 16), 28.0f * scale);
-    draw->AddRect(cardMin, cardMax, ImColor(255, 255, 255, 42), 28.0f * scale, 0, 1.0f * scale);
-    draw->AddLine(ImVec2(cardMin.x + 28.0f * scale, cardMin.y + 1.0f * scale),
-                  ImVec2(cardMax.x - 28.0f * scale, cardMin.y + 1.0f * scale),
-                  ImColor(255, 255, 255, 74), 1.0f * scale);
+    // Cartão menor, translúcido e com borda de vidro fosco.
+    const float cardRadius = (landscape ? 22.0f : 28.0f) * scale;
+    const float cardPadX = (landscape ? 14.0f : 22.0f) * scale;
+    const float cardPadTop = (landscape ? 12.0f : 20.0f) * scale;
+    const float cardPadBottom = (landscape ? 16.0f : 28.0f) * scale;
+    const ImVec2 cardMin(contentLeft - cardPadX, top - cardPadTop);
+    const ImVec2 cardMax(contentLeft + contentWidth + cardPadX, top + blockHeight + cardPadBottom);
+    draw->AddRectFilled(cardMin, cardMax, ImColor(255, 255, 255, landscape ? 28 : 34), cardRadius);
+    draw->AddRect(cardMin, cardMax, ImColor(255, 255, 255, 64), cardRadius, 0, 1.0f * scale);
+    draw->AddLine(ImVec2(cardMin.x + 24.0f * scale, cardMin.y + 1.0f * scale),
+                  ImVec2(cardMax.x - 24.0f * scale, cardMin.y + 1.0f * scale),
+                  ImColor(255, 255, 255, 90), 1.0f * scale);
 
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
     ImGui::SetNextWindowSize(viewport, ImGuiCond_Always);
@@ -463,7 +475,7 @@ extern void MyMenu() {
             });
         }
 
-        ImGui::SetCursorPosY(top + iconSize + 30.0f * scale);
+        ImGui::SetCursorPosY(top + iconSize + iconTitleGap);
         const float redPulse = 0.92f + 0.08f * (0.5f + 0.5f * sinf((float)ImGui::GetTime() * 2.4f));
         const float titleWidth = ImGui::CalcTextSize("FFH4X SYSTEM").x * 1.42f;
         const ImVec4 pulseRed = ImVec4(0.72f, 0.76f, 1.0f, 1.0f);
@@ -481,7 +493,7 @@ extern void MyMenu() {
         ImGui::Text("Digite sua chave de acesso para continuar");
         ImGui::PopStyleColor();
 
-        ImGui::SetCursorPosY(top + iconSize + 24.0f * scale + titleSize + 8.0f * scale + subtitleSize + 40.0f * scale);
+        ImGui::SetCursorPosY(top + iconSize + iconTitleGap + titleSize + titleSubtitleGap + subtitleSize + subtitleFieldGap);
         ImGui::SetCursorPosX(contentLeft);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f * scale);
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(18.0f * scale, 13.0f * scale));
@@ -494,7 +506,7 @@ extern void MyMenu() {
         ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(0.33f, 0.33f, 0.34f, 1.0f));
         if (loginInputField != nil) {
             CGRect inputFrame = CGRectMake(contentLeft,
-                                           top + iconSize + 24.0f * scale + titleSize + 8.0f * scale + subtitleSize + 40.0f * scale,
+                                           top + iconSize + iconTitleGap + titleSize + titleSubtitleGap + subtitleSize + subtitleFieldGap,
                                            contentWidth,
                                            fieldHeight);
             loginInputField.frame = inputFrame;
@@ -517,7 +529,7 @@ extern void MyMenu() {
         }
         ImGui::PopStyleColor(6);
         ImGui::PopStyleVar(3);
-        ImGui::SetCursorPosY(top + iconSize + 24.0f * scale + titleSize + 8.0f * scale + subtitleSize + 40.0f * scale + fieldHeight + 20.0f * scale);
+        ImGui::SetCursorPosY(top + iconSize + iconTitleGap + titleSize + titleSubtitleGap + subtitleSize + subtitleFieldGap + fieldHeight + fieldButtonGap);
         ImGui::SetCursorPosX(contentLeft);
         ImGui::BeginDisabled(proxyKayLoading);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f * scale);
@@ -841,7 +853,8 @@ static void __attribute__((constructor)) CosmkloadYZ() {
                     UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemMaterial];
                     loginBlurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
                     loginBlurView.frame = hostBounds;
-                    loginBlurView.alpha = 0.76f;
+                    // Blur forte no fundo, mas sem bloquear visualmente a tela deitada.
+                    loginBlurView.alpha = 0.86f;
                     loginBlurView.userInteractionEnabled = NO;
                     loginBlurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
                     [hostWindow addSubview:loginBlurView];
@@ -944,5 +957,4 @@ static void __attribute__((constructor)) CosmkloadYZ() {
 
 
 @end
-
 
