@@ -396,11 +396,14 @@ extern void MyMenu() {
     const ImVec2 viewport = io.DisplaySize;
     ImDrawList* draw = ImGui::GetBackgroundDrawList();
 
-    // Tela Android original: fundo preto com leve variação vermelha no topo.
-    draw->AddRectFilled(ImVec2(0.0f, 0.0f), viewport, ImColor(5, 5, 5, 255));
-    draw->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(viewport.x, viewport.y * 0.48f),
-                                  ImColor(26, 0, 0, 255), ImColor(8, 8, 8, 255),
-                                  ImColor(8, 8, 8, 255), ImColor(5, 5, 5, 255));
+    // Visual liquid glass inspirado no iOS: azul-noite, brilho difuso e cartão translúcido.
+    draw->AddRectFilled(ImVec2(0.0f, 0.0f), viewport, ImColor(7, 10, 22, 255));
+    draw->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(viewport.x, viewport.y * 0.62f),
+                                  ImColor(22, 28, 58, 255), ImColor(10, 16, 38, 255),
+                                  ImColor(8, 12, 27, 255), ImColor(5, 8, 18, 255));
+    const float glow = 0.5f + 0.5f * sinf((float)ImGui::GetTime() * 0.55f);
+    draw->AddCircleFilled(ImVec2(viewport.x * 0.18f, viewport.y * 0.15f), 150.0f + 20.0f * glow, ImColor(91, 78, 220, 18));
+    draw->AddCircleFilled(ImVec2(viewport.x * 0.84f, viewport.y * 0.78f), 190.0f + 24.0f * (1.0f - glow), ImColor(44, 166, 255, 14));
 
     const float layoutAxis = ImMin(viewport.x, viewport.y);
     const float scale = ImClamp(layoutAxis / 390.0f, 0.72f, 1.18f);
@@ -415,6 +418,15 @@ extern void MyMenu() {
     const float centerX = viewport.x * 0.5f;
     const float blockHeight = iconSize + 24.0f * scale + titleSize + 8.0f * scale + subtitleSize + 40.0f * scale + fieldHeight + 20.0f * scale + fieldHeight;
     const float top = ImMax(32.0f * scale, viewport.y * 0.5f - blockHeight * 0.5f);
+
+    // Cartão de vidro com borda sutil e sombra difusa.
+    const ImVec2 cardMin(contentLeft - 22.0f * scale, top - 24.0f * scale);
+    const ImVec2 cardMax(contentLeft + contentWidth + 22.0f * scale, top + blockHeight + 34.0f * scale);
+    draw->AddRectFilled(cardMin, cardMax, ImColor(255, 255, 255, 16), 28.0f * scale);
+    draw->AddRect(cardMin, cardMax, ImColor(255, 255, 255, 42), 28.0f * scale, 0, 1.0f * scale);
+    draw->AddLine(ImVec2(cardMin.x + 28.0f * scale, cardMin.y + 1.0f * scale),
+                  ImVec2(cardMax.x - 28.0f * scale, cardMin.y + 1.0f * scale),
+                  ImColor(255, 255, 255, 74), 1.0f * scale);
 
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
     ImGui::SetNextWindowSize(viewport, ImGuiCond_Always);
@@ -452,10 +464,10 @@ extern void MyMenu() {
         }
 
         ImGui::SetCursorPosY(top + iconSize + 30.0f * scale);
-        const float redPulse = 0.82f + 0.18f * (0.5f + 0.5f * sinf((float)ImGui::GetTime() * 3.2f));
+        const float redPulse = 0.92f + 0.08f * (0.5f + 0.5f * sinf((float)ImGui::GetTime() * 2.4f));
         const float titleWidth = ImGui::CalcTextSize("FFH4X SYSTEM").x * 1.42f;
-        const ImVec4 pulseRed = ImVec4(0.88f * redPulse, 0.035f, 0.04f, 1.0f);
-        const ImVec4 brightRed = ImVec4(1.0f, 0.08f + 0.04f * redPulse, 0.08f + 0.04f * redPulse, 1.0f);
+        const ImVec4 pulseRed = ImVec4(0.72f, 0.76f, 1.0f, 1.0f);
+        const ImVec4 brightRed = ImVec4(0.36f, 0.62f, 1.0f, 1.0f);
         ImGui::SetCursorPosX((viewport.x - titleWidth) * 0.5f);
         ImGui::SetWindowFontScale(textScale * 1.42f);
         ImGui::PushStyleColor(ImGuiCol_Text, pulseRed);
@@ -465,7 +477,7 @@ extern void MyMenu() {
         ImGui::SetWindowFontScale(textScale);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5.0f * scale);
         ImGui::SetCursorPosX((viewport.x - ImGui::CalcTextSize("Digite sua chave de acesso para continuar").x) * 0.5f);
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.96f * redPulse, 0.32f, 0.34f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.68f, 0.72f, 0.86f, 1.0f));
         ImGui::Text("Digite sua chave de acesso para continuar");
         ImGui::PopStyleColor();
 
@@ -474,10 +486,10 @@ extern void MyMenu() {
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f * scale);
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(18.0f * scale, 13.0f * scale));
         ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
-        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.11f, 0.11f, 0.12f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.14f, 0.14f, 0.15f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.14f, 0.14f, 0.15f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.52f * redPulse, 0.035f, 0.045f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.09f, 0.11f, 0.18f, 0.92f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.13f, 0.17f, 0.27f, 0.96f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.16f, 0.21f, 0.34f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.36f, 0.56f, 0.98f, 0.78f));
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(0.33f, 0.33f, 0.34f, 1.0f));
         if (loginInputField != nil) {
@@ -509,9 +521,9 @@ extern void MyMenu() {
         ImGui::SetCursorPosX(contentLeft);
         ImGui::BeginDisabled(proxyKayLoading);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f * scale);
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.64f * redPulse, 0.025f, 0.035f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.43f, 0.86f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, brightRed);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.45f, 0.01f, 0.018f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.18f, 0.30f, 0.66f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
         if (ImGui::Button(proxyKayLoading ? "VALIDANDO..." : "VALIDAR CHAVE", ImVec2(contentWidth, fieldHeight))) {
             if (proxyKay[0] == '\0') {
@@ -864,8 +876,7 @@ static void __attribute__((constructor)) CosmkloadYZ() {
                     loginInputField.userInteractionEnabled = YES;
                     [hostWindow addSubview:loginInputField];
                     [hostWindow bringSubviewToFront:loginInputField];
-                    // A KAY copiada só é verificada depois que a abertura terminar.
-                    // O disparo pós-abertura acontece no completion abaixo.
+                    // Uma KAY copiada pode ser verificada assim que o login aparece.
 
                     // Procura o recurso tanto no bundle do tweak quanto nos caminhos rootless.
                     NSMutableArray<NSString *> *artworkCandidates = [NSMutableArray array];
@@ -914,181 +925,16 @@ static void __attribute__((constructor)) CosmkloadYZ() {
                         [hostWindow bringSubviewToFront:loginArtworkView];
                     }
 
-                    // Tela de abertura profissional: cobre o login durante 30 segundos.
-                    loginSplashView = [[UIView alloc] initWithFrame:hostBounds];
-                    loginSplashView.backgroundColor = [UIColor colorWithRed:0.015f green:0.02f blue:0.035f alpha:0.98f];
-                    loginSplashView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-                    loginSplashView.userInteractionEnabled = YES;
-
-                    CAGradientLayer *splashGradient = [CAGradientLayer layer];
-                    splashGradient.frame = hostBounds;
-                    splashGradient.colors = @[(id)[UIColor colorWithRed:0.02f green:0.04f blue:0.08f alpha:1.0f].CGColor,
-                                              (id)[UIColor colorWithRed:0.005f green:0.008f blue:0.015f alpha:1.0f].CGColor];
-                    splashGradient.startPoint = CGPointMake(0.0, 0.0);
-                    splashGradient.endPoint = CGPointMake(1.0, 1.0);
-                    [loginSplashView.layer addSublayer:splashGradient];
-                    CABasicAnimation *gradientMotion = [CABasicAnimation animationWithKeyPath:@"locations"];
-                    gradientMotion.fromValue = @[@0.0f, @0.42f, @1.0f];
-                    gradientMotion.toValue = @[@(-0.20f), @0.50f, @1.20f];
-                    gradientMotion.duration = 6.0f;
-                    gradientMotion.autoreverses = YES;
-                    gradientMotion.repeatCount = HUGE_VALF;
-                    gradientMotion.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-                    [splashGradient addAnimation:gradientMotion forKey:@"ffh4x_gradient_motion"];
-
-                    // Cartão de vidro fosco inspirado no iOS 26.
-                    // Camada transparente full-screen: sem cartão/quadrado visível.
-                    UIView *splashCard = [[UIView alloc] initWithFrame:hostBounds];
-                    splashCard.backgroundColor = UIColor.clearColor;
-                    splashCard.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-                    splashCard.layer.cornerRadius = 0.0f;
-                    splashCard.layer.borderWidth = 0.0f;
-                    splashCard.layer.shadowOpacity = 0.0f;
-                    [loginSplashView addSubview:splashCard];
-
-                    UIImageView *splashArtworkView = nil;
-                    if (artwork != nil) {
-                        splashArtworkView = [[UIImageView alloc] initWithImage:artwork];
-                        splashArtworkView.frame = CGRectMake(hostBounds.size.width * 0.5f - 72.0f,
-                                                             hostBounds.size.height * 0.5f - 170.0f,
-                                                             144.0f,
-                                                             144.0f);
-                        splashArtworkView.contentMode = UIViewContentModeScaleAspectFill;
-                        splashArtworkView.clipsToBounds = YES;
-                        splashArtworkView.layer.cornerRadius = 28.0f;
-                        splashArtworkView.layer.borderWidth = 1.0f;
-                        splashArtworkView.layer.borderColor = [UIColor colorWithWhite:1.0f alpha:0.18f].CGColor;
-                        [splashCard addSubview:splashArtworkView];
+                    // Abertura removida: o login aparece imediatamente.
+                    // Mantemos apenas o artwork como elemento de marca e o campo de texto
+                    // continua sendo o controle nativo responsável pelo teclado seguro.
+                    if (loginArtworkView != nil) {
+                        [hostWindow bringSubviewToFront:loginArtworkView];
+                        loginArtworkView.alpha = 1.0f;
+                        loginArtworkView.transform = CGAffineTransformIdentity;
                     }
-
-                    UILabel *splashTitle = [[UILabel alloc] initWithFrame:CGRectMake(24.0f,
-                                                                                       hostBounds.size.height * 0.5f + 4.0f,
-                                                                                       hostBounds.size.width - 48.0f,
-                                                                                       42.0f)];
-                    splashTitle.text = @"FFH4X SYSTEM";
-                    splashTitle.textColor = [UIColor colorWithRed:1.0f green:0.035f blue:0.045f alpha:1.0f];
-                    splashTitle.font = [UIFont systemFontOfSize:28.0f weight:UIFontWeightBold];
-                    splashTitle.textAlignment = NSTextAlignmentCenter;
-                    splashTitle.layer.shadowColor = [UIColor redColor].CGColor;
-                    splashTitle.layer.shadowOpacity = 0.85f;
-                    splashTitle.layer.shadowRadius = 14.0f;
-                    CABasicAnimation *splashTitlePulse = [CABasicAnimation animationWithKeyPath:@"opacity"];
-                    splashTitlePulse.fromValue = @0.60f;
-                    splashTitlePulse.toValue = @1.0f;
-                    splashTitlePulse.duration = 1.1f;
-                    splashTitlePulse.autoreverses = YES;
-                    splashTitlePulse.repeatCount = HUGE_VALF;
-                    [splashTitle.layer addAnimation:splashTitlePulse forKey:@"ffh4x_splash_title_pulse"];
-                    [splashCard addSubview:splashTitle];
-
-                    UILabel *splashSubtitle = [[UILabel alloc] initWithFrame:CGRectMake(24.0f,
-                                                                                          hostBounds.size.height * 0.5f + 48.0f,
-                                                                                          hostBounds.size.width - 48.0f,
-                                                                                          24.0f)];
-                    splashSubtitle.text = @"Inicializando sistema...";
-                    splashSubtitle.textColor = [UIColor colorWithWhite:0.72f alpha:1.0f];
-                    splashSubtitle.font = [UIFont systemFontOfSize:15.0f weight:UIFontWeightMedium];
-                    splashSubtitle.textAlignment = NSTextAlignmentCenter;
-                    [splashCard addSubview:splashSubtitle];
-
-                    UIActivityIndicatorView *splashSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
-                    splashSpinner.color = [UIColor colorWithRed:1.0f green:0.035f blue:0.045f alpha:1.0f];
-                    splashSpinner.center = CGPointMake(hostBounds.size.width * 0.5f, hostBounds.size.height * 0.5f + 92.0f);
-                    [splashSpinner startAnimating];
-                    [splashCard addSubview:splashSpinner];
-
-                    loginSplashProgress = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
-                    loginSplashProgress.frame = CGRectMake(56.0f,
-                                                            hostBounds.size.height * 0.5f + 128.0f,
-                                                            hostBounds.size.width - 112.0f,
-                                                            4.0f);
-                    loginSplashProgress.progressTintColor = [UIColor colorWithRed:0.95f green:0.025f blue:0.035f alpha:1.0f];
-                    loginSplashProgress.trackTintColor = [UIColor colorWithWhite:1.0f alpha:0.12f];
-                    loginSplashProgress.progress = 0.0f;
-                    [splashCard addSubview:loginSplashProgress];
-                    UIView *splashProgressMarker = [[UIView alloc] initWithFrame:CGRectMake(56.0f,
-                                                                                             hostBounds.size.height * 0.5f + 124.0f,
-                                                                                             118.0f,
-                                                                                             10.0f)];
-                    splashProgressMarker.backgroundColor = [UIColor colorWithRed:1.0f green:0.04f blue:0.05f alpha:0.92f];
-                    splashProgressMarker.layer.cornerRadius = 5.0f;
-                    splashProgressMarker.layer.shadowColor = [UIColor redColor].CGColor;
-                    splashProgressMarker.layer.shadowOpacity = 0.9f;
-                    splashProgressMarker.layer.shadowRadius = 12.0f;
-                    splashProgressMarker.layer.shadowOffset = CGSizeZero;
-                    [splashCard addSubview:splashProgressMarker];
-                    [UIView animateWithDuration:1.35
-                                          delay:0.0
-                                        options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionAutoreverse | UIViewAnimationOptionRepeat
-                                     animations:^{
-                        splashProgressMarker.frame = CGRectMake(hostBounds.size.width - 174.0f,
-                                                                 hostBounds.size.height * 0.5f + 124.0f,
-                                                                 118.0f,
-                                                                 10.0f);
-                        splashProgressMarker.alpha = 0.42f;
-                    } completion:nil];
-                                        [hostWindow addSubview:loginSplashView];
-                    [hostWindow bringSubviewToFront:loginSplashView];
-                    splashCard.alpha = 0.0f;
-                    splashCard.transform = CGAffineTransformMakeScale(0.88f, 0.88f);
-                    splashArtworkView.alpha = 0.0f;
-                    splashArtworkView.transform = CGAffineTransformMakeScale(0.72f, 0.72f);
-                    splashTitle.alpha = 0.0f;
-                    splashSubtitle.alpha = 0.0f;
-                    splashSpinner.alpha = 0.0f;
-                    loginSplashProgress.alpha = 0.0f;
-                    [UIView animateWithDuration:0.75 delay:0.05 usingSpringWithDamping:0.82 initialSpringVelocity:0.35 options:UIViewAnimationOptionCurveEaseOut animations:^{
-                        splashCard.alpha = 1.0f;
-                        splashCard.transform = CGAffineTransformIdentity;
-                    } completion:nil];
-                    [UIView animateWithDuration:0.70 delay:0.22 usingSpringWithDamping:0.76 initialSpringVelocity:0.55 options:UIViewAnimationOptionCurveEaseOut animations:^{
-                        splashArtworkView.alpha = 1.0f;
-                        splashArtworkView.transform = CGAffineTransformIdentity;
-                    } completion:nil];
-                    CAKeyframeAnimation *splashFloat = [CAKeyframeAnimation animationWithKeyPath:@"transform.translation.y"];
-                    splashFloat.values = @[@(-7.0f), @(7.0f), @(-7.0f)];
-                    splashFloat.keyTimes = @[@0.0f, @0.5f, @1.0f];
-                    splashFloat.duration = 3.6f;
-                    splashFloat.repeatCount = HUGE_VALF;
-                    splashFloat.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-                    [splashArtworkView.layer addAnimation:splashFloat forKey:@"ffh4x_splash_float"];
-                    [UIView animateWithDuration:0.50 delay:0.48 options:UIViewAnimationOptionCurveEaseOut animations:^{
-                        splashTitle.alpha = 1.0f;
-                    } completion:nil];
-                    [UIView animateWithDuration:0.50 delay:0.62 options:UIViewAnimationOptionCurveEaseOut animations:^{
-                        splashSubtitle.alpha = 1.0f;
-                        splashSpinner.alpha = 1.0f;
-                        loginSplashProgress.alpha = 1.0f;
-                    } completion:nil];
-                    [UIView animateWithDuration:20.0 animations:^{
-                        loginSplashProgress.progress = 1.0f;
-                    }];
-                    [loginSplashProgress setProgress:1.0f animated:YES];
-                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                        [UIView animateWithDuration:0.60 animations:^{
-                            loginSplashView.alpha = 0.0f;
-                            loginSplashView.transform = CGAffineTransformMakeScale(1.035f, 1.035f);
-                        } completion:^(BOOL finished) {
-                            [loginSplashView removeFromSuperview];
-                            loginSplashView = nil;
-                            loginSplashProgress = nil;
-                            if (loginBlurView != nil) {
-                                [hostWindow bringSubviewToFront:Global_DrawView];
-                                if (loginArtworkView != nil) {
-                                    [hostWindow bringSubviewToFront:loginArtworkView];
-                                    loginArtworkView.alpha = 0.0f;
-                                    loginArtworkView.transform = CGAffineTransformMakeScale(0.84f, 0.84f);
-                                    [UIView animateWithDuration:0.72 delay:0.05 usingSpringWithDamping:0.82 initialSpringVelocity:0.3 options:UIViewAnimationOptionCurveEaseOut animations:^{
-                                        loginArtworkView.alpha = 1.0f;
-                                        loginArtworkView.transform = CGAffineTransformIdentity;
-                                    } completion:nil];
-                                }
-                            }
-                            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                                TryAutoPasteProxyKey();
-                            });
-                        }];
-                    });
+                    [hostWindow bringSubviewToFront:loginInputField];
+                    TryAutoPasteProxyKey();
                 }
             });
         // }];
@@ -1098,6 +944,5 @@ static void __attribute__((constructor)) CosmkloadYZ() {
 
 
 @end
-
 
 
