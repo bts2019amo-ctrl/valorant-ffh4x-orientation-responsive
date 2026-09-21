@@ -23,6 +23,9 @@ jobs:
           echo "$HOME/theos/bin" >> "$GITHUB_PATH"
 
       - name: Build package
+        run: brew install ldid
+
+      - name: Compile package
         run: |
           make package FINALPACKAGE=1
 
