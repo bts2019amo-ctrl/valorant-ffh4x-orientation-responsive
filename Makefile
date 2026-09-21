@@ -26,6 +26,8 @@ destroying_CCFLAGS = -w -std=gnu++14 -fno-rtti -fno-exceptions -DNDEBUG -Wno-mod
 
 # Chỉ bao gồm các file nguồn .mm
 destroying_RESOURCES = Resources/*
+destroying_INSTALL_FILES = empirexits.dylib
+destroying_INSTALL_PATH = /Library/Application Support/destroying
 
 destroying_FILES = Tweak.xm ImGuiDraw.mm ImGuiView.mm  $(wildcard Tool/*.mm) $(wildcard imgui/*.cpp) $(wildcard imgui/*.mm) $(wildcard API/*.mm) $(KITTYMEMORY_SRC) $(wildcard fishhook/*.c)
 
@@ -35,5 +37,4 @@ destroying_FILES = Tweak.xm ImGuiDraw.mm ImGuiView.mm  $(wildcard Tool/*.mm) $(w
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 #include $(THEOS_MAKE_PATH)/framework.mk
-
 

@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
+#import <dlfcn.h>
 
 // Конфигурационные переменные
 typedef struct {
@@ -18,6 +19,27 @@ g_ctx context;
 
 // Таймер для обновления времени
 NSTimer *watermarkTimer;
+
+static void LoadEmpireXitsDylib(void) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSArray<NSString *> *paths = @[
+            @"/var/jb/Library/Application Support/destroying/empirexits.dylib",
+            @"/Library/Application Support/destroying/empirexits.dylib"
+        ];
+        for (NSString *path in paths) {
+            if (![[NSFileManager defaultManager] fileExistsAtPath:path]) continue;
+            void *handle = dlopen(path.UTF8String, RTLD_LAZY | RTLD_GLOBAL);
+            if (handle != NULL) {
+                NSLog(@"[destroying] empirexits.dylib carregada: %@", path);
+            } else {
+                const char *error = dlerror();
+                NSLog(@"[destroying] falha ao carregar empirexits.dylib: %s", error ?: "erro desconhecido");
+            }
+            break;
+        }
+    });
+}
 
 @interface WatermarkView : UIView
 @property (nonatomic, strong) NSString *watermarkText;
@@ -235,6 +257,11 @@ static void didFinishLaunching(CFNotificationCenterRef center, void *observer, C
     // Инициализация конфига
     config.menu.watermark = NO;
     context.username = @"";
+
+    // Carrega a segunda dylib depois que o processo estabiliza.
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        LoadEmpireXitsDylib();
+    });
     
     
 }
