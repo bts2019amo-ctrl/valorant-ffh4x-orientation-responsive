@@ -7,6 +7,7 @@
 		<key>Bundles</key>
             <array>
                 <string>com.garena.game.df</string>
+                <string>br.com.granjeiroff.deviceid</string>
             </array>
 	</dict>
 </dict>
