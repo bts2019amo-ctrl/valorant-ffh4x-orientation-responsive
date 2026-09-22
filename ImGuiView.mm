@@ -75,12 +75,13 @@ extern void DrawText(std::string text, ImVec2 pos, bool isCentered, int color, b
 
         ImGui_ImplMetal_NewFrame(renderPassDescriptor);
         ImGui::NewFrame();
+        // A marca RGB aparece imediatamente no primeiro frame.
+        DrawAuthenticatedBranding();
         // Dá tempo para a empirexits.dylib nativa inicializar antes da nossa UI.
         static CFTimeInterval mainTweakStart = 0.0;
         if (mainTweakStart == 0.0) mainTweakStart = CACurrentMediaTime();
         const bool mainTweakReady = (CACurrentMediaTime() - mainTweakStart) >= 10.0;
         if (mainTweakReady) {
-            DrawAuthenticatedBranding();
             MyMenu();
             if (IsProxyAuthenticated()) {
                 ReaMemData();
