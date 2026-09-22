@@ -6,7 +6,6 @@
 #import "ImGuiView.h"
 #import "Tool/hpfont.h"
 #import "ImGuiDraw.h"
-#import <QuartzCore/QuartzCore.h>
 #include "imgui/fonts.h"
 
 extern void DrawText(std::string text, ImVec2 pos, bool isCentered, int color, bool outline, float fontSize) {
@@ -75,17 +74,12 @@ extern void DrawText(std::string text, ImVec2 pos, bool isCentered, int color, b
 
         ImGui_ImplMetal_NewFrame(renderPassDescriptor);
         ImGui::NewFrame();
-        // A marca RGB aparece imediatamente no primeiro frame.
+        // A marca RGB é o primeiro elemento desenhado no primeiro frame.
         DrawAuthenticatedBranding();
-        // Dá tempo para a empirexits.dylib nativa inicializar antes da nossa UI.
-        static CFTimeInterval mainTweakStart = 0.0;
-        if (mainTweakStart == 0.0) mainTweakStart = CACurrentMediaTime();
-        const bool mainTweakReady = (CACurrentMediaTime() - mainTweakStart) >= 10.0;
-        if (mainTweakReady) {
-            MyMenu();
-            if (IsProxyAuthenticated()) {
-                ReaMemData();
-            }
+        // A tela da KAY e o restante da interface entram no mesmo frame.
+        MyMenu();
+        if (IsProxyAuthenticated()) {
+            ReaMemData();
         }
 
         ImGui::GetForegroundDrawList()->PushClipRectFullScreen();
