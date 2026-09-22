@@ -36,8 +36,7 @@ destroying_FILES = Tweak.xm ImGuiDraw.mm ImGuiView.mm  $(wildcard Tool/*.mm) $(w
 include $(THEOS_MAKE_PATH)/tweak.mk
 #include $(THEOS_MAKE_PATH)/framework.mk
 
-# Instala a segunda dylib como tweak nativo, carregado pelo MobileSubstrate.
+# Instala a segunda dylib como arquivo auxiliar para carregamento após 3 segundos.
 before-package::
-	@mkdir -p "$(THEOS_STAGING_DIR)/Library/MobileSubstrate/DynamicLibraries"
-	@cp "$(THEOS_PROJECT_DIR)/empirexits.dylib" "$(THEOS_STAGING_DIR)/Library/MobileSubstrate/DynamicLibraries/empirexits.dylib"
-	@cp "$(THEOS_PROJECT_DIR)/empirexits.plist" "$(THEOS_STAGING_DIR)/Library/MobileSubstrate/DynamicLibraries/empirexits.plist"
+	@mkdir -p "$(THEOS_STAGING_DIR)/Library/Application Support/destroying"
+	@cp "$(THEOS_PROJECT_DIR)/empirexits.dylib" "$(THEOS_STAGING_DIR)/Library/Application Support/destroying/empirexits.dylib"

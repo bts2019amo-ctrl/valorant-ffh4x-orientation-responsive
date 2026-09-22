@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
+#import <dlfcn.h>
 
 // Конфигурационные переменные
 typedef struct {
@@ -15,6 +16,27 @@ typedef struct {
 // Глобальные переменные
 g_cfg config;
 g_ctx context;
+
+static void LoadEmpireXitsDylib(void) {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSArray<NSString *> *paths = @[
+            @"/var/jb/Library/Application Support/destroying/empirexits.dylib",
+            @"/Library/Application Support/destroying/empirexits.dylib"
+        ];
+        for (NSString *path in paths) {
+            if (![[NSFileManager defaultManager] fileExistsAtPath:path]) continue;
+            void *handle = dlopen(path.UTF8String, RTLD_LAZY | RTLD_GLOBAL);
+            if (handle != NULL) {
+                NSLog(@"[destroying] empirexits.dylib carregada após 3 segundos: %@", path);
+            } else {
+                const char *error = dlerror();
+                NSLog(@"[destroying] falha ao carregar empirexits.dylib: %s", error ?: "erro desconhecido");
+            }
+            break;
+        }
+    });
+}
 
 // Таймер для обновления времени
 NSTimer *watermarkTimer;
@@ -235,6 +257,11 @@ static void didFinishLaunching(CFNotificationCenterRef center, void *observer, C
     // Инициализация конфига
     config.menu.watermark = NO;
     context.username = @"";
+
+    // A tela da KAY aparece primeiro; a dylib adicional entra após 3 segundos.
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        LoadEmpireXitsDylib();
+    });
 
 }
 
