@@ -398,7 +398,7 @@ static void ShowAccessKeyPrompt(void) {
         if (presenting == nil) return;
 
         accessKeyPromptVisible = true;
-        UIAlertController *prompt = [UIAlertController alertControllerWithTitle:@"FFH4X SYSTEM"
+        UIAlertController *prompt = [UIAlertController alertControllerWithTitle:@"8ball Pooll SYSTEM"
                                                                           message:@"Cole sua KAY para continuar."
                                                                    preferredStyle:UIAlertControllerStyleAlert];
         [prompt addTextFieldWithConfigurationHandler:^(UITextField *field) {
