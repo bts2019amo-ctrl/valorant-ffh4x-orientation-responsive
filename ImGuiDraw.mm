@@ -478,7 +478,7 @@ void DrawAuthenticatedBranding() {
     const bool landscape = viewport.x > viewport.y * 1.15f;
     const float scale = ImClamp(ImMin(viewport.x, viewport.y) / 430.0f, 0.62f, 0.95f);
     const float fontSize = (landscape ? 19.0f : 20.0f) * scale;
-    const char *label = "FFH4X SYSTEM BY MARCELO";
+    const char *label = "8ball Pooll SYSTEM";
     const ImVec2 textSize = ImGui::GetFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, label);
     const float margin = 12.0f * scale;
     const float padX = 10.0f * scale;
