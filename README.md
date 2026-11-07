@@ -5,12 +5,14 @@ Este repositório gera um tweak iOS rootless que exibe somente um prompt UIKit p
 ## Escopo
 
 - Exibe uma caixa nativa com campo seguro para a chave.
-- Valida a KAY em `https://proxysystem.org/api/trpc/android.validateKey`.
+- Valida a KAY por `GET https://proxysystem.org/api/trpc/proxyKeys.publicCheckKey`, com `input={json:{key,deviceId}}`.
+- Autoriza somente quando a resposta tRPC contém `success=true`, `active=true` e `status="active"`; apresenta mensagens de erro, vínculo de dispositivo e `expiresAt`.
+- Gera um identificador iOS estável baseado no IDFV, com SHA-256 truncado para 32 caracteres hexadecimais, sem solicitar IDFA.
 - Não inclui overlay/menu de jogo, ESP, aimbot, offsets, patches, leitura/escrita de memória, hooks de jogo, ImGui ou dylib auxiliar.
 - Uma chave válida apenas fecha o prompt e mostra a confirmação; nenhuma funcionalidade de jogo é ativada.
 - A chave não é salva em `NSUserDefaults` nem copiada automaticamente da área de transferência.
 
-`destroying.plist` mantém os mesmos identificadores de bundle configurados anteriormente. O tweak aguarda o app ficar ativo e a janela UIKit estar disponível antes de exibir o prompt.
+`destroying.plist` mantém os mesmos identificadores de bundle configurados anteriormente. O tweak aguarda o app ficar ativo e a janela UIKit estar disponível antes de exibir o prompt. Como o serviço vincula chaves a um `deviceId`, uma chave já associada a outro aparelho pode ser recusada.
 
 ## Compilação
 

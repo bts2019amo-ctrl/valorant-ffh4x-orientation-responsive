@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import <CommonCrypto/CommonDigest.h>
 
 static BOOL gStarted = NO;
 static BOOL gPromptVisible = NO;
@@ -14,6 +15,34 @@ static void PresentLoginAttempt(NSUInteger generation, NSUInteger attempt);
 static void ValidateKey(NSString *key);
 static void PresentResult(NSString *title, NSString *message, BOOL valid, BOOL retry);
 static void PresentResultAttempt(NSString *title, NSString *message, BOOL valid, BOOL retry, NSUInteger attempt);
+
+static NSString *ProxyDeviceIdentifier(void) {
+    static NSString *deviceIdentifier = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSString *sourceID = [UIDevice currentDevice].identifierForVendor.UUIDString;
+        if (sourceID.length == 0) {
+            NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+            sourceID = [defaults stringForKey:@"proxy_device_seed"];
+            if (sourceID.length == 0) {
+                sourceID = [NSUUID UUID].UUIDString;
+                [defaults setObject:sourceID forKey:@"proxy_device_seed"];
+            }
+        }
+
+        NSString *model = [UIDevice currentDevice].model;
+        if (model.length == 0) model = @"unknown";
+        NSString *seed = [NSString stringWithFormat:@"projectx-device-v2|%@|Apple|%@", sourceID, model];
+        NSData *seedData = [seed dataUsingEncoding:NSUTF8StringEncoding];
+        unsigned char digest[CC_SHA256_DIGEST_LENGTH] = {0};
+        CC_SHA256(seedData.bytes, (CC_LONG)seedData.length, digest);
+
+        NSMutableString *shortHash = [NSMutableString stringWithCapacity:32];
+        for (NSUInteger i = 0; i < 16; i++) [shortHash appendFormat:@"%02X", digest[i]];
+        deviceIdentifier = [shortHash copy];
+    });
+    return deviceIdentifier;
+}
 
 static UIViewController *TopViewController(void) {
     UIApplication *application = [UIApplication sharedApplication];
@@ -153,7 +182,8 @@ static void PresentResultAttempt(NSString *title, NSString *message, BOOL valid,
 }
 
 static void ValidateKey(NSString *key) {
-    NSDictionary *payload = @{ @"0": @{ @"json": @{ @"key": key } } };
+    NSString *deviceID = ProxyDeviceIdentifier();
+    NSDictionary *payload = @{ @"json": @{ @"key": key, @"deviceId": deviceID ?: @"" } };
     NSError *serializationError = nil;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:&serializationError];
     if (jsonData == nil || serializationError != nil) {
@@ -162,11 +192,8 @@ static void ValidateKey(NSString *key) {
     }
 
     NSString *json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    NSURLComponents *components = [NSURLComponents componentsWithString:@"https://proxysystem.org/api/trpc/android.validateKey"];
-    components.queryItems = @[
-        [NSURLQueryItem queryItemWithName:@"batch" value:@"1"],
-        [NSURLQueryItem queryItemWithName:@"input" value:json ?: @""]
-    ];
+    NSURLComponents *components = [NSURLComponents componentsWithString:@"https://proxysystem.org/api/trpc/proxyKeys.publicCheckKey"];
+    components.queryItems = @[[NSURLQueryItem queryItemWithName:@"input" value:json ?: @""]];
     NSURL *url = components.URL;
     if (url == nil) {
         PresentResult(@"Erro de validação", @"Não foi possível criar a solicitação.", NO, YES);
@@ -175,7 +202,7 @@ static void ValidateKey(NSString *key) {
 
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url
                                                           cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
-                                                      timeoutInterval:12.0];
+                                                      timeoutInterval:15.0];
     request.HTTPMethod = @"GET";
     [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
 
@@ -186,32 +213,46 @@ static void ValidateKey(NSString *key) {
                 PresentResult(@"Falha na validação", @"Não foi possível conectar ao servidor de chaves.", NO, YES);
                 return;
             }
-            if (![response isKindOfClass:[NSHTTPURLResponse class]] || ((NSHTTPURLResponse *)response).statusCode != 200) {
-                NSInteger status = [response isKindOfClass:[NSHTTPURLResponse class]] ? ((NSHTTPURLResponse *)response).statusCode : 0;
-                PresentResult(@"Falha na validação", [NSString stringWithFormat:@"O servidor retornou HTTP %ld.", (long)status], NO, YES);
-                return;
-            }
 
             NSError *parseError = nil;
             id root = [NSJSONSerialization JSONObjectWithData:data options:0 error:&parseError];
             NSDictionary *result = nil;
-            if ([root isKindOfClass:[NSArray class]] && [(NSArray *)root count] > 0) {
-                id first = [(NSArray *)root firstObject];
-                if ([first isKindOfClass:[NSDictionary class]]) result = first[@"result"][@"data"][@"json"];
+            if ([root isKindOfClass:[NSDictionary class]]) {
+                id rpcResult = root[@"result"];
+                id rpcData = [rpcResult isKindOfClass:[NSDictionary class]] ? rpcResult[@"data"] : nil;
+                id rpcJSON = [rpcData isKindOfClass:[NSDictionary class]] ? rpcData[@"json"] : nil;
+                if ([rpcJSON isKindOfClass:[NSDictionary class]]) result = rpcJSON;
             }
             if (parseError != nil || ![result isKindOfClass:[NSDictionary class]]) {
-                PresentResult(@"Falha na validação", @"A resposta do servidor é inválida.", NO, YES);
+                NSInteger statusCode = [response isKindOfClass:[NSHTTPURLResponse class]] ? ((NSHTTPURLResponse *)response).statusCode : 0;
+                NSString *message = (statusCode < 200 || statusCode >= 400)
+                    ? [NSString stringWithFormat:@"O servidor retornou HTTP %ld.", (long)statusCode]
+                    : @"A resposta do servidor é inválida.";
+                PresentResult(@"Falha na validação", message, NO, YES);
                 return;
             }
 
-            if ([result[@"valid"] boolValue]) {
-                NSInteger daysLeft = [result[@"daysLeft"] integerValue];
+            NSString *status = [result[@"status"] isKindOfClass:[NSString class]] ? result[@"status"] : @"";
+            BOOL success = [result[@"success"] boolValue];
+            BOOL active = [result[@"active"] boolValue];
+            BOOL isActiveStatus = [status caseInsensitiveCompare:@"active"] == NSOrderedSame;
+            if (success && active && isActiveStatus) {
+                NSString *expiresAt = [result[@"expiresAt"] isKindOfClass:[NSString class]] ? result[@"expiresAt"] : @"";
                 NSString *message = @"Sua KAY foi validada com sucesso.";
-                if (daysLeft > 0) message = [NSString stringWithFormat:@"%@\nDias restantes: %ld", message, (long)daysLeft];
+                if (expiresAt.length > 0) message = [NSString stringWithFormat:@"%@\nExpira em: %@", message, expiresAt];
                 PresentResult(@"Chave validada", message, YES, NO);
             } else {
-                NSString *reason = [result[@"reason"] isKindOfClass:[NSString class]] ? result[@"reason"] : nil;
-                PresentResult(@"KAY inválida ou expirada", reason.length > 0 ? reason : @"Verifique a chave e tente novamente.", NO, YES);
+                NSString *errorCode = [result[@"errorCode"] isKindOfClass:[NSString class]] ? result[@"errorCode"] : @"";
+                NSString *failureCode = errorCode.length > 0 ? errorCode : status;
+                NSString *message = [result[@"message"] isKindOfClass:[NSString class]] ? result[@"message"] : @"";
+                if ([failureCode caseInsensitiveCompare:@"DEVICE_MISMATCH"] == NSOrderedSame ||
+                    [failureCode caseInsensitiveCompare:@"device_mismatch"] == NSOrderedSame) {
+                    message = @"Esta chave já está vinculada a outro aparelho.";
+                } else if (message.length == 0) {
+                    message = [result[@"reason"] isKindOfClass:[NSString class]] ? result[@"reason"] : @"";
+                }
+                if (message.length == 0) message = @"A key não foi aceita.";
+                PresentResult(@"KAY inválida ou expirada", message, NO, YES);
             }
         });
     }];
