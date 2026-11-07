@@ -1,9 +1,9 @@
 Package: com.ds.valorant
-Name:  DS Valorant
-Depends: mobilesubstrate, preferenceloader
-Version: 2.0
+Name: 8ball Pooll Login
+Depends: mobilesubstrate
+Version: 2.1
 Architecture: iphoneos-arm64
-Description: procoda666
-Maintainer: destroying
-Author: destroying
+Description: Standalone UIKit key-validation prompt; no game hooks, overlays, offsets, or memory manipulation.
+Maintainer: 8ball Pooll
+Author: 8ball Pooll
 Section: Tweaks

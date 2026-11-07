@@ -1,33 +1,26 @@
-# Valorant FFH4X Orientation Responsive
+# 8ball Pooll Login (iOS / Theos)
 
-Projeto de tweak iOS/Theos com o nome de pacote `destroying`.
+Este repositório gera um tweak iOS rootless que exibe somente um prompt UIKit para inserir uma KAY e validá-la no serviço configurado.
 
-## Estado do build
+## Escopo
 
-O build não pode ser executado neste ambiente Linux porque o projeto exige **Theos**, um SDK do iPhone/iOS e a toolchain Apple. A tentativa local falha com:
+- Exibe uma caixa nativa com campo seguro para a chave.
+- Valida a KAY em `https://proxysystem.org/api/trpc/android.validateKey`.
+- Não inclui overlay/menu de jogo, ESP, aimbot, offsets, patches, leitura/escrita de memória, hooks de jogo, ImGui ou dylib auxiliar.
+- Uma chave válida apenas fecha o prompt e mostra a confirmação; nenhuma funcionalidade de jogo é ativada.
+- A chave não é salva em `NSUserDefaults` nem copiada automaticamente da área de transferência.
 
-```text
-[!] THEOS not found at /var/mobile/theos
-```
+`destroying.plist` mantém os mesmos identificadores de bundle configurados anteriormente. O tweak aguarda o app ficar ativo e a janela UIKit estar disponível antes de exibir o prompt.
 
-O workflow de GitHub Actions em `.github/workflows/build.yml` usa um runner macOS para instalar o Theos e tentar gerar o pacote `.deb`.
+## Compilação
 
-## Build local em um Mac/iPhone com Theos
+O build exige macOS, Theos e o SDK de iOS. O workflow `.github/workflows/build.yml` instala as dependências de build, executa `make package FINALPACKAGE=1` e publica o `.deb` como artefato.
 
-```bash
-export THEOS=/path/to/theos
+Para compilar localmente:
+
+```sh
+export THEOS=/caminho/para/theos
 ./Make.sh
 ```
 
-O pacote gerado aparecerá em `packages/`. Para instalação em um dispositivo compatível, use o fluxo de deploy apropriado ao seu ambiente; o script aceita `./Make.sh install` quando `dpkg` está disponível.
-
-## Estrutura
-
-- `Makefile`: configuração do tweak Theos para `arm64`, rootless e iOS 16.5.
-- `Make.sh`: limpeza e empacotamento do projeto.
-- `Tweak.xm`, `ImGui*`, `KittyMemory/`, `fishhook/` e `imgui/`: código-fonte e dependências incluídas no arquivo original.
-- `Resources/`: recursos incorporados ao pacote.
-
-## Observações
-
-Este repositório reproduz o conteúdo do arquivo ZIP fornecido. Nenhum segredo ou artefato de build é incluído; diretórios `.theos/` e `packages/` são ignorados pelo Git.
+O pacote é arm64/rootless. O script apenas compila; não instala no dispositivo.
