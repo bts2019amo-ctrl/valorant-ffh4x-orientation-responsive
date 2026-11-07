@@ -1,7 +1,7 @@
 Package: com.ds.valorant
 Name: 8ball Pooll Login
 Depends: mobilesubstrate
-Version: 2.1
+Version: 2.2
 Architecture: iphoneos-arm64
 Description: Standalone UIKit key-validation prompt; no game hooks, overlays, offsets, or memory manipulation.
 Maintainer: 8ball Pooll
